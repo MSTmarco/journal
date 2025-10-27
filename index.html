@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en-US">
     <title>Journal</title>
+    <!-- Typo.js for spell checking -->
+    <script src="https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -189,6 +192,63 @@
             margin-left: auto;
         }
 
+        .date-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-label {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .date-select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            font-family: inherit;
+            margin-right: 5px;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+
+        /* Force English in date picker */
+        .date-input::-webkit-datetime-edit-month-field,
+        .date-input::-webkit-datetime-edit-day-field,
+        .date-input::-webkit-datetime-edit-year-field {
+            color: #666;
+        }
+
+        .date-input:hover {
+            border-color: #ccc;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #1a1a1a;
+        }
+
         .photo-section {
             margin-bottom: 25px;
         }
@@ -351,6 +411,54 @@
             font-size: 0.8em;
             margin-top: 15px;
             font-weight: 400;
+        }
+
+        .spellcheck-note {
+            font-size: 0.75em;
+            color: #999;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            line-height: 1.5;
+        }
+
+        .spelling-error {
+            text-decoration: underline wavy #dc2626;
+            cursor: pointer;
+        }
+
+        .spell-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 1000;
+            font-size: 0.9em;
+        }
+
+        .spell-menu-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .spell-menu-item:hover {
+            background: #f5f5f5;
+        }
+
+        .spell-menu-suggestion {
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .spell-menu-ignore {
+            border-top: 1px solid #f0f0f0;
+            color: #999;
+            font-size: 0.85em;
         }
 
         .save-btn {
@@ -842,6 +950,10 @@
                     <button class="goal-btn" data-goal="time">5 minutes</button>
                     <button class="goal-btn" data-goal="sentence">1 sentence</button>
                 </div>
+                <div class="date-picker-container">
+                    <label for="entryDate" class="date-label">Entry Date:</label>
+                    <input type="date" id="entryDate" class="date-input" lang="en-US">
+                </div>
                 <div class="timer" id="timer"></div>
             </div>
 
@@ -861,9 +973,13 @@
                 <button class="format-btn" data-format="quote" title="Quote">Quote</button>
             </div>
 
-            <div id="journalEntry" class="rich-editor" contenteditable="true" data-placeholder="Start writing your thoughts..."></div>
+            <div id="journalEntry" class="rich-editor" contenteditable="true" spellcheck="true" lang="en-US" data-placeholder="Start writing your thoughts..."></div>
             
             <div class="word-count" id="wordCount">0 words</div>
+            
+            <div class="spellcheck-note">
+                ✓ Custom spell checker enabled! Misspelled words will have red wavy underlines. Right-click for suggestions.
+            </div>
             
             <button class="save-btn" id="saveBtn">Save Entry</button>
             <button class="view-history-btn" id="viewHistoryBtn">View All Entries</button>
@@ -926,15 +1042,35 @@
         let startTime = null;
         let timerInterval = null;
         let currentPhoto = null;
+        let currentEntryDate = null;
+        let spellChecker = null;
+        let spellCheckTimeout = null;
+        let currentSpellMenu = null;
+        let ignoredWords = new Set();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Set today's date as default
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+            
+            document.getElementById('entryDate').value = todayStr;
+            currentEntryDate = todayStr;
+            
             loadData();
             setRandomPrompt();
             renderCalendar();
             updateStats();
             setupEventListeners();
             checkTodayEntry();
+            
+            // Initialize spell checker
+            initializeSpellChecker();
+            
+            console.log('Journal initialized with spell checker');
         });
 
         function setupEventListeners() {
@@ -966,7 +1102,20 @@
                 if (!startTime && editor.textContent.trim().length > 0) {
                     startTimer();
                 }
+                
+                // Debounced spell checking
+                clearTimeout(spellCheckTimeout);
+                spellCheckTimeout = setTimeout(() => {
+                    if (spellChecker) {
+                        checkSpelling();
+                    }
+                }, 1000);
             });
+
+            // Handle right-click for spell suggestions
+            editor.addEventListener('contextmenu', handleSpellContextMenu);
+
+            // Browser spellcheck is already enabled via spellcheck="true" attribute
 
             // Formatting toolbar
             document.querySelectorAll('.format-btn').forEach(btn => {
@@ -984,8 +1133,21 @@
 
             document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
 
+            // Date picker
+            document.getElementById('entryDate').addEventListener('change', (e) => {
+                currentEntryDate = e.target.value;
+                loadEntryForDate(currentEntryDate);
+            });
+
             // Save button
             document.getElementById('saveBtn').addEventListener('click', saveEntry);
+
+            // Close spell menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (currentSpellMenu && !currentSpellMenu.contains(e.target) && !e.target.classList.contains('spelling-error')) {
+                    closeSpellMenu();
+                }
+            });
 
             // View history button
             document.getElementById('viewHistoryBtn').addEventListener('click', openHistoryModal);
@@ -1105,12 +1267,12 @@
                 return;
             }
 
-            const today = new Date().toISOString().split('T')[0];
+            const entryDate = currentEntryDate || new Date().toISOString().split('T')[0];
             const entries = getEntries();
             
             const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
             
-            entries[today] = {
+            entries[entryDate] = {
                 html: html,
                 text: text,
                 wordCount: wordCount,
@@ -1120,17 +1282,23 @@
 
             localStorage.setItem('journalEntries', JSON.stringify(entries));
             
+            // Remove draft for this date
+            localStorage.removeItem(`draft_${entryDate}`);
+            
             showSuccessMessage();
             updateStats();
             renderCalendar();
             
-            // Clear for next entry
-            setTimeout(() => {
-                editor.innerHTML = '';
-                removePhoto();
-                updateWordCount();
-                resetTimer();
-            }, 1500);
+            // Clear for next entry only if it's today's entry
+            const today = new Date().toISOString().split('T')[0];
+            if (entryDate === today) {
+                setTimeout(() => {
+                    editor.innerHTML = '';
+                    removePhoto();
+                    updateWordCount();
+                    resetTimer();
+                }, 1500);
+            }
         }
 
         function autoSave() {
@@ -1139,28 +1307,295 @@
             const text = editor.textContent.trim();
             
             if (text) {
-                const today = new Date().toISOString().split('T')[0];
+                const entryDate = currentEntryDate || new Date().toISOString().split('T')[0];
                 const draft = { 
                     html, 
                     text,
                     photo: currentPhoto,
                     timestamp: new Date().toISOString() 
                 };
-                localStorage.setItem(`draft_${today}`, JSON.stringify(draft));
+                localStorage.setItem(`draft_${entryDate}`, JSON.stringify(draft));
             }
         }
 
         function checkTodayEntry() {
             const today = new Date().toISOString().split('T')[0];
-            const draft = localStorage.getItem(`draft_${today}`);
+            loadEntryForDate(today);
+        }
+
+        function formatDateInEnglish(dateString) {
+            const date = new Date(dateString);
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             
+            return {
+                full: `${weekdays[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`,
+                short: `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`,
+                display: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+            };
+        }
+
+        function initializeSpellChecker() {
+            try {
+                // Initialize Typo.js with US English dictionary
+                spellChecker = new Typo("en_US", false, false, {
+                    dictionaryPath: "https://cdn.jsdelivr.net/npm/typo-js@1.2.1/dictionaries"
+                });
+                console.log('✓ Spell checker initialized');
+            } catch (error) {
+                console.log('Spell checker not available:', error);
+            }
+        }
+
+        function checkSpelling() {
+            const editor = document.getElementById('journalEntry');
+            const text = editor.textContent;
+            
+            if (!text || text.length < 2) return;
+            
+            // Save cursor position BEFORE making changes
+            const selection = window.getSelection();
+            let cursorNode = null;
+            let cursorOffset = 0;
+            
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                cursorNode = range.startContainer;
+                cursorOffset = range.startOffset;
+            }
+            
+            // Calculate absolute cursor position in text
+            let absoluteCursorPos = 0;
+            if (cursorNode) {
+                const walker = document.createTreeWalker(
+                    editor,
+                    NodeFilter.SHOW_TEXT,
+                    null
+                );
+                
+                let currentPos = 0;
+                while (walker.nextNode()) {
+                    if (walker.currentNode === cursorNode) {
+                        absoluteCursorPos = currentPos + cursorOffset;
+                        break;
+                    }
+                    currentPos += walker.currentNode.textContent.length;
+                }
+            }
+            
+            // Remove old highlights
+            const oldHighlights = editor.querySelectorAll('.spelling-error');
+            oldHighlights.forEach(el => {
+                const text = el.textContent;
+                el.replaceWith(document.createTextNode(text));
+            });
+            
+            // Normalize text nodes
+            editor.normalize();
+            
+            // Check each word and add highlights
+            const walker = document.createTreeWalker(
+                editor,
+                NodeFilter.SHOW_TEXT,
+                null
+            );
+            
+            const nodesToProcess = [];
+            while (walker.nextNode()) {
+                nodesToProcess.push(walker.currentNode);
+            }
+            
+            nodesToProcess.forEach(node => {
+                if (!node.parentNode || node.parentNode.classList?.contains('spelling-error')) return;
+                
+                const text = node.textContent;
+                const words = text.match(/\b[a-zA-Z]+\b/g);
+                
+                if (!words) return;
+                
+                let html = text;
+                const wordsToHighlight = [];
+                
+                words.forEach(word => {
+                    if (word.length > 1 && !ignoredWords.has(word.toLowerCase())) {
+                        const isCorrect = spellChecker.check(word);
+                        if (!isCorrect) {
+                            wordsToHighlight.push(word);
+                        }
+                    }
+                });
+                
+                if (wordsToHighlight.length > 0) {
+                    wordsToHighlight.forEach(word => {
+                        const regex = new RegExp(`\\b${word}\\b`, 'g');
+                        html = html.replace(regex, `<span class="spelling-error" data-word="${word}">${word}</span>`);
+                    });
+                    
+                    const template = document.createElement('template');
+                    template.innerHTML = html;
+                    
+                    const parent = node.parentNode;
+                    const fragment = template.content;
+                    parent.replaceChild(fragment, node);
+                }
+            });
+            
+            // RESTORE cursor position
+            if (absoluteCursorPos > 0) {
+                try {
+                    const walker = document.createTreeWalker(
+                        editor,
+                        NodeFilter.SHOW_TEXT,
+                        null
+                    );
+                    
+                    let currentPos = 0;
+                    while (walker.nextNode()) {
+                        const node = walker.currentNode;
+                        const nodeLength = node.textContent.length;
+                        
+                        if (currentPos + nodeLength >= absoluteCursorPos) {
+                            const offset = absoluteCursorPos - currentPos;
+                            const newRange = document.createRange();
+                            newRange.setStart(node, Math.min(offset, nodeLength));
+                            newRange.collapse(true);
+                            
+                            selection.removeAllRanges();
+                            selection.addRange(newRange);
+                            break;
+                        }
+                        
+                        currentPos += nodeLength;
+                    }
+                } catch (e) {
+                    // If cursor restoration fails, just continue
+                    console.log('Could not restore cursor:', e);
+                }
+            }
+        }
+
+        function handleSpellContextMenu(e) {
+            const target = e.target;
+            
+            if (target.classList.contains('spelling-error')) {
+                e.preventDefault();
+                
+                const word = target.dataset.word;
+                if (word && spellChecker) {
+                    const suggestions = spellChecker.suggest(word);
+                    showSpellMenu(e.clientX, e.clientY, word, suggestions, target);
+                }
+            }
+        }
+
+        function showSpellMenu(x, y, word, suggestions, targetElement) {
+            closeSpellMenu();
+            
+            const menu = document.createElement('div');
+            menu.className = 'spell-menu';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            
+            // Add suggestions (max 5)
+            const topSuggestions = suggestions.slice(0, 5);
+            if (topSuggestions.length > 0) {
+                topSuggestions.forEach(suggestion => {
+                    const item = document.createElement('div');
+                    item.className = 'spell-menu-item';
+                    
+                    const span = document.createElement('span');
+                    span.className = 'spell-menu-suggestion';
+                    span.textContent = suggestion;
+                    item.appendChild(span);
+                    
+                    item.addEventListener('click', () => {
+                        replaceSpellingError(targetElement, suggestion);
+                        closeSpellMenu();
+                    });
+                    
+                    menu.appendChild(item);
+                });
+            } else {
+                const item = document.createElement('div');
+                item.className = 'spell-menu-item';
+                item.style.color = '#999';
+                item.textContent = 'No suggestions';
+                menu.appendChild(item);
+            }
+            
+            // Add ignore option
+            const ignoreItem = document.createElement('div');
+            ignoreItem.className = 'spell-menu-item spell-menu-ignore';
+            ignoreItem.textContent = 'Ignore';
+            ignoreItem.addEventListener('click', () => {
+                ignoredWords.add(word.toLowerCase());
+                targetElement.classList.remove('spelling-error');
+                targetElement.outerHTML = targetElement.textContent;
+                closeSpellMenu();
+            });
+            menu.appendChild(ignoreItem);
+            
+            document.body.appendChild(menu);
+            currentSpellMenu = menu;
+            
+            // Adjust position if menu goes off screen
+            const rect = menu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                menu.style.left = (x - rect.width) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                menu.style.top = (y - rect.height) + 'px';
+            }
+        }
+
+        function closeSpellMenu() {
+            if (currentSpellMenu) {
+                currentSpellMenu.remove();
+                currentSpellMenu = null;
+            }
+        }
+
+        function replaceSpellingError(element, replacement) {
+            element.textContent = replacement;
+            element.classList.remove('spelling-error');
+            element.outerHTML = element.textContent;
+        }
+
+        function loadEntryForDate(date) {
+            const entries = getEntries();
+            const editor = document.getElementById('journalEntry');
+            
+            // Check for saved entry first
+            if (entries[date]) {
+                const entry = entries[date];
+                editor.innerHTML = entry.html || entry.text;
+                if (entry.photo) {
+                    currentPhoto = entry.photo;
+                    displayPhoto(entry.photo);
+                } else {
+                    removePhoto();
+                }
+                updateWordCount();
+                return;
+            }
+            
+            // Check for draft
+            const draft = localStorage.getItem(`draft_${date}`);
             if (draft) {
                 const { html, photo } = JSON.parse(draft);
-                document.getElementById('journalEntry').innerHTML = html;
+                editor.innerHTML = html;
                 if (photo) {
                     currentPhoto = photo;
                     displayPhoto(photo);
+                } else {
+                    removePhoto();
                 }
+                updateWordCount();
+            } else {
+                // Clear editor if no entry or draft
+                editor.innerHTML = '';
+                removePhoto();
                 updateWordCount();
             }
         }
@@ -1299,12 +1734,7 @@
 
             entriesList.innerHTML = filteredDates.map(date => {
                 const entry = entries[date];
-                const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+                const formattedDate = formatDateInEnglish(date).full;
                 
                 const photoHTML = entry.photo ? `<img src="${entry.photo}" alt="Journal photo">` : '';
                 const contentHTML = entry.html || entry.text;
@@ -1353,6 +1783,10 @@
                     displayPhoto(entry.photo);
                 }
                 
+                // Update date picker to the entry's date
+                document.getElementById('entryDate').value = date;
+                currentEntryDate = date;
+                
                 updateWordCount();
                 closeHistoryModal();
                 
@@ -1364,11 +1798,7 @@
 
         function deleteEntry(date) {
             const entries = getEntries();
-            const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
+            const formattedDate = formatDateInEnglish(date).short;
             
             if (confirm(`Are you sure you want to delete your entry from ${formattedDate}? This cannot be undone.`)) {
                 delete entries[date];
