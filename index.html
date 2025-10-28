@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Language" content="en-US">
     <title>Journal</title>
-    <!-- Typo.js for spell checking -->
-    <script src="https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -424,8 +422,14 @@
         }
 
         .spelling-error {
-            text-decoration: underline wavy #dc2626;
+            background: transparent;
+            border-bottom: 1px dotted #ddd;
             cursor: pointer;
+        }
+
+        .spelling-error:hover {
+            background: #fee;
+            border-bottom-color: #dc2626;
         }
 
         .spell-menu {
@@ -641,6 +645,19 @@
             font-weight: 600;
         }
 
+        .modal-header h2[contenteditable="true"]:empty:before {
+            content: attr(data-placeholder);
+            color: #999;
+            font-style: italic;
+        }
+
+        .modal-header h2[contenteditable="true"]:focus {
+            outline: 2px solid #1a1a1a;
+            outline-offset: 4px;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
         .close-modal {
             background: transparent;
             border: none;
@@ -804,6 +821,549 @@
         .no-entries h3 {
             color: #666;
             margin-bottom: 10px;
+        }
+
+        .project-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .new-project-btn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .new-project-btn:hover {
+            background: #333;
+        }
+
+        .project-filters {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .filter-btn.active {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .project-card {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #1a1a1a;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #e8e8e8;
+        }
+
+        .project-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+
+        .project-card.solved {
+            border-left-color: #22c55e;
+            opacity: 0.7;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .project-title {
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 1.1em;
+            flex: 1;
+        }
+
+        .project-goal {
+            font-size: 0.9em;
+            color: #666;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .project-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .project-status.active {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .project-status.solved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .project-meta {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        .project-detail-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .project-canvas {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .canvas-section {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .canvas-section:hover {
+            border-color: #ccc;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .canvas-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .canvas-section-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .canvas-section-content {
+            color: #333;
+            line-height: 1.6;
+            min-height: 60px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+            border: 2px dashed transparent;
+            cursor: text;
+            transition: all 0.2s;
+        }
+
+        .canvas-section-content:hover {
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+        }
+
+        .canvas-section-content:focus {
+            outline: none;
+            background: white;
+            border-color: #1a1a1a;
+        }
+
+        .canvas-section-content[contenteditable="true"]:empty:before {
+            content: attr(data-placeholder);
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Formatting styles for project canvas */
+        .canvas-section-content h1,
+        .canvas-item-content h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0.5em 0;
+            color: #1a1a1a;
+        }
+
+        .canvas-section-content h2,
+        .canvas-item-content h2 {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin: 0.4em 0;
+            color: #1a1a1a;
+        }
+
+        .canvas-section-content h3,
+        .canvas-item-content h3 {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 0.3em 0;
+            color: #333;
+        }
+
+        .canvas-section-content strong,
+        .canvas-item-content strong {
+            font-weight: 700;
+        }
+
+        .canvas-section-content em,
+        .canvas-item-content em {
+            font-style: italic;
+        }
+
+        .canvas-section-content blockquote,
+        .canvas-item-content blockquote {
+            border-left: 4px solid #e0e0e0;
+            padding-left: 16px;
+            margin: 12px 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .canvas-toolbar {
+            display: none;
+            gap: 4px;
+            padding: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+
+        .canvas-toolbar.active {
+            display: flex;
+        }
+
+        .canvas-toolbar-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .canvas-toolbar-btn:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .canvas-toolbar-btn.active {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .canvas-section-empty {
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+            background: #fafafa;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px dashed #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .canvas-section-empty:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .canvas-list-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .add-item-btn {
+            padding: 12px;
+            background: #f8f8f8;
+            border: 2px dashed #e0e0e0;
+            border-radius: 6px;
+            color: #666;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .add-item-btn:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .canvas-item {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #1a1a1a;
+            position: relative;
+        }
+
+        .canvas-item.idea {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .canvas-item.action {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .canvas-item.action.done {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .canvas-item.progress {
+            border-left-color: #8b5cf6;
+            background: #f5f3ff;
+        }
+
+        .canvas-item-content {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            min-height: 40px;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: text;
+            line-height: 1.5;
+        }
+
+        .canvas-item-content:focus {
+            outline: none;
+            background: white;
+        }
+
+        .canvas-item-content[contenteditable="true"]:empty:before {
+            content: "Write here...";
+            color: #999;
+            font-style: italic;
+        }
+
+        .canvas-item-meta {
+            font-size: 0.75em;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .canvas-item-btn {
+            padding: 4px 10px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.85em;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .canvas-item-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .toggle-action-btn {
+            color: #3b82f6;
+        }
+
+        .delete-item-btn {
+            color: #dc2626;
+        }
+
+        .project-freeform-notes {
+            min-height: 300px;
+            padding: 20px;
+            background: white;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            color: #1a1a1a;
+            line-height: 1.8;
+            font-size: 1em;
+            cursor: text;
+            transition: all 0.2s;
+        }
+
+        .project-freeform-notes:hover {
+            border-color: #ccc;
+        }
+
+        .project-freeform-notes:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+        }
+
+        .project-freeform-notes[contenteditable="true"]:empty:before {
+            content: attr(data-placeholder);
+            color: #999;
+            font-style: italic;
+        }
+
+        .project-notes-word-count {
+            text-align: right;
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 10px;
+            font-weight: 400;
+        }
+
+        .project-action-btn {
+            padding: 10px 20px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .project-action-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .delete-project-btn {
+            margin-left: auto;
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+
+        .delete-project-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .project-notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .project-note {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .project-note-date {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .project-note-content {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .project-note-actions {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            gap: 10px;
+        }
+
+        .note-action-btn {
+            padding: 6px 14px;
+            border: none;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+
+        .note-action-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .note-delete-btn {
+            background: #fee;
+            color: #dc2626;
+        }
+
+        .note-delete-btn:hover {
+            background: #dc2626;
+            color: white;
         }
 
         .search-filter {
@@ -983,6 +1543,7 @@
             
             <button class="save-btn" id="saveBtn">Save Entry</button>
             <button class="view-history-btn" id="viewHistoryBtn">View All Entries</button>
+            <button class="view-history-btn" id="viewProjectsBtn">My Projects</button>
         </div>
 
         <div class="calendar">
@@ -1004,6 +1565,52 @@
                 </div>
                 <div class="entries-list" id="entriesList">
                     <!-- Entries will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Modal -->
+    <div class="modal" id="projectsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>My Projects</h2>
+                <button class="close-modal" id="closeProjectsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-controls">
+                    <button class="new-project-btn" id="newProjectBtn" onclick="createNewProject()">+ New Project</button>
+                    <div class="project-filters">
+                        <button class="filter-btn active" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="solved">Solved</button>
+                        <button class="filter-btn" data-filter="all">All</button>
+                    </div>
+                </div>
+                <div class="projects-list" id="projectsList">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Detail Modal -->
+    <div class="modal" id="projectDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="projectDetailTitle" 
+                    contenteditable="true" 
+                    data-placeholder="Click to name your project..."
+                    onblur="updateProjectTitle(currentProjectId, this.textContent)"
+                    style="cursor: text; outline: none; min-width: 200px;">Project Title</h2>
+                <button class="close-modal" id="closeProjectDetailModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-detail-controls">
+                    <button class="project-action-btn" id="markSolvedBtn">Mark as Solved</button>
+                    <button class="project-action-btn delete-project-btn" id="deleteProjectBtn">Delete</button>
+                </div>
+                <div class="project-canvas" id="projectCanvas">
+                    <!-- Project canvas will be loaded here -->
                 </div>
             </div>
         </div>
@@ -1047,6 +1654,8 @@
         let spellCheckTimeout = null;
         let currentSpellMenu = null;
         let ignoredWords = new Set();
+        let currentProjectFilter = 'active';
+        let currentProjectId = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1067,10 +1676,7 @@
             setupEventListeners();
             checkTodayEntry();
             
-            // Initialize spell checker
-            initializeSpellChecker();
-            
-            console.log('Journal initialized with spell checker');
+            console.log('Journal initialized');
         });
 
         function setupEventListeners() {
@@ -1103,17 +1709,8 @@
                     startTimer();
                 }
                 
-                // Debounced spell checking
-                clearTimeout(spellCheckTimeout);
-                spellCheckTimeout = setTimeout(() => {
-                    if (spellChecker) {
-                        checkSpelling();
-                    }
-                }, 1000);
+                // Custom spell checking disabled - using browser's built-in spellcheck instead
             });
-
-            // Handle right-click for spell suggestions
-            editor.addEventListener('contextmenu', handleSpellContextMenu);
 
             // Browser spellcheck is already enabled via spellcheck="true" attribute
 
@@ -1152,6 +1749,9 @@
             // View history button
             document.getElementById('viewHistoryBtn').addEventListener('click', openHistoryModal);
             
+            // View projects button
+            document.getElementById('viewProjectsBtn').addEventListener('click', openProjectsModal);
+            
             // Close modal
             document.getElementById('closeModal').addEventListener('click', closeHistoryModal);
             document.getElementById('historyModal').addEventListener('click', (e) => {
@@ -1159,6 +1759,45 @@
                     closeHistoryModal();
                 }
             });
+
+            // Projects modal controls
+            document.getElementById('closeProjectsModal').addEventListener('click', closeProjectsModal);
+            document.getElementById('projectsModal').addEventListener('click', (e) => {
+                if (e.target.id === 'projectsModal') {
+                    closeProjectsModal();
+                }
+            });
+
+            const newProjectBtn = document.getElementById('newProjectBtn');
+            if (newProjectBtn) {
+                newProjectBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('New Project button clicked!');
+                    createNewProject();
+                });
+            } else {
+                console.error('newProjectBtn not found!');
+            }
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentProjectFilter = btn.dataset.filter;
+                    loadProjects();
+                });
+            });
+
+            // Project detail modal
+            document.getElementById('closeProjectDetailModal').addEventListener('click', closeProjectDetailModal);
+            document.getElementById('projectDetailModal').addEventListener('click', (e) => {
+                if (e.target.id === 'projectDetailModal') {
+                    closeProjectDetailModal();
+                }
+            });
+
+            document.getElementById('markSolvedBtn').addEventListener('click', toggleProjectStatus);
+            document.getElementById('deleteProjectBtn').addEventListener('click', deleteProject);
 
             // Search entries
             document.getElementById('searchInput').addEventListener('input', filterEntries);
@@ -1832,6 +2471,524 @@
                 }
                 localStorage.removeItem('todayEntry');
             }
+        }
+
+        // ========== PROJECTS FUNCTIONS ==========
+
+        function getProjects() {
+            return JSON.parse(localStorage.getItem('journalProjects') || '{}');
+        }
+
+        function saveProjects(projects) {
+            localStorage.setItem('journalProjects', JSON.stringify(projects));
+        }
+
+        function openProjectsModal() {
+            document.getElementById('projectsModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadProjects();
+        }
+
+        function closeProjectsModal() {
+            document.getElementById('projectsModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function loadProjects() {
+            const projects = getProjects();
+            const projectsList = document.getElementById('projectsList');
+            const projectIds = Object.keys(projects).sort((a, b) => {
+                return new Date(projects[b].createdAt) - new Date(projects[a].createdAt);
+            });
+
+            // Filter projects
+            const filteredIds = projectIds.filter(id => {
+                const project = projects[id];
+                if (currentProjectFilter === 'all') return true;
+                if (currentProjectFilter === 'active') return project.status === 'active';
+                if (currentProjectFilter === 'solved') return project.status === 'solved';
+                return true;
+            });
+
+            if (filteredIds.length === 0) {
+                projectsList.innerHTML = `
+                    <div class="no-entries">
+                        <div class="no-entries-icon">💡</div>
+                        <h3>No projects yet</h3>
+                        <p>Click "New Project" to start tracking your ideas and problems!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            projectsList.innerHTML = filteredIds.map(id => {
+                const project = projects[id];
+                
+                // Count items in each section
+                const situationCount = project.situation ? 1 : 0;
+                const ideasCount = project.ideas ? project.ideas.length : 0;
+                const actionsCount = project.actions ? project.actions.length : 0;
+                const progressCount = project.progress ? project.progress.length : 0;
+                
+                const totalItems = situationCount + ideasCount + actionsCount + progressCount;
+                const lastUpdated = project.updatedAt 
+                    ? new Date(project.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                return `
+                    <div class="project-card ${project.status}" data-project-id="${id}">
+                        <div class="project-header">
+                            <div class="project-title">${project.title}</div>
+                            <div class="project-status ${project.status}">${project.status}</div>
+                        </div>
+                        ${project.goal ? `<div class="project-goal">🎯 ${project.goal}</div>` : ''}
+                        <div class="project-stats">
+                            <span class="stat-badge">💡 ${ideasCount} ideas</span>
+                            <span class="stat-badge">✅ ${actionsCount} actions</span>
+                            <span class="stat-badge">📊 ${progressCount} updates</span>
+                        </div>
+                        <div class="project-meta">Last updated: ${lastUpdated}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openProjectDetail(card.dataset.projectId);
+                });
+            });
+        }
+
+        function createNewProject() {
+            console.log('Creating new project...');
+            
+            const projects = getProjects();
+            const projectId = 'project_' + Date.now();
+            
+            // Create blank project
+            projects[projectId] = {
+                title: 'Untitled Project',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                goal: '',
+                situation: '',
+                ideas: [],
+                actions: [],
+                progress: []
+            };
+
+            console.log('Saving project:', projects[projectId]);
+            saveProjects(projects);
+            
+            // Close projects list and open the blank canvas
+            closeProjectsModal();
+            openProjectDetail(projectId);
+            
+            // Focus on title so user can rename
+            setTimeout(() => {
+                const titleElement = document.getElementById('projectDetailTitle');
+                if (titleElement) {
+                    titleElement.focus();
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    range.selectNodeContents(titleElement);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }, 100);
+            
+            console.log('Project created successfully!');
+        }
+
+        function openProjectDetail(projectId) {
+            currentProjectId = projectId;
+            const projects = getProjects();
+            const project = projects[projectId];
+
+            if (!project) return;
+
+            document.getElementById('projectDetailTitle').textContent = project.title;
+            document.getElementById('projectDetailModal').classList.add('active');
+            
+            // Update button text based on status
+            const solvedBtn = document.getElementById('markSolvedBtn');
+            solvedBtn.textContent = project.status === 'solved' ? '↩ Reopen' : '✓ Solved';
+
+            loadProjectCanvas(projectId);
+        }
+
+        function updateProjectTitle(projectId, newTitle) {
+            if (!projectId) return;
+            
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            const trimmedTitle = newTitle.trim();
+            if (trimmedTitle && trimmedTitle !== project.title) {
+                project.title = trimmedTitle;
+                project.updatedAt = new Date().toISOString();
+                saveProjects(projects);
+            } else if (!trimmedTitle) {
+                // If empty, restore original title
+                document.getElementById('projectDetailTitle').textContent = project.title;
+            }
+        }
+
+        function closeProjectDetailModal() {
+            document.getElementById('projectDetailModal').classList.remove('active');
+            currentProjectId = null;
+            loadProjects(); // Refresh the projects list
+        }
+
+        function loadProjectCanvas(projectId) {
+            const projects = getProjects();
+            const project = projects[projectId];
+            const canvas = document.getElementById('projectCanvas');
+
+            let html = '';
+
+            // Goal Section - Click to edit
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">🎯 Goal / Objective</div>
+                    </div>
+                    <div class="canvas-toolbar" id="goalToolbar">
+                        <button class="canvas-toolbar-btn" data-format="title" onclick="applyCanvasFormat('goal', 'h1')">Title</button>
+                        <button class="canvas-toolbar-btn" data-format="subtitle" onclick="applyCanvasFormat('goal', 'h2')">Subtitle</button>
+                        <button class="canvas-toolbar-btn" data-format="heading" onclick="applyCanvasFormat('goal', 'h3')">Heading</button>
+                        <button class="canvas-toolbar-btn" data-format="normal" onclick="applyCanvasFormat('goal', 'p')">Normal</button>
+                        <button class="canvas-toolbar-btn" data-format="bold" onclick="applyCanvasFormat('goal', 'bold')">B</button>
+                        <button class="canvas-toolbar-btn" data-format="italic" onclick="applyCanvasFormat('goal', 'italic')">/</button>
+                        <button class="canvas-toolbar-btn" data-format="quote" onclick="applyCanvasFormat('goal', 'blockquote')">Quote</button>
+                    </div>
+                    <div class="canvas-section-content" 
+                         contenteditable="true" 
+                         id="goalContent"
+                         data-placeholder="Click to write your goal... What are you trying to achieve?"
+                         onfocus="showCanvasToolbar('goal')"
+                         onblur="saveProjectField('${projectId}', 'goal', this.innerHTML)">${project.goal || ''}</div>
+                </div>
+            `;
+
+            // Current Situation - Click to edit
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">🤔 Current Situation</div>
+                    </div>
+                    <div class="canvas-toolbar" id="situationToolbar">
+                        <button class="canvas-toolbar-btn" data-format="title" onclick="applyCanvasFormat('situation', 'h1')">Title</button>
+                        <button class="canvas-toolbar-btn" data-format="subtitle" onclick="applyCanvasFormat('situation', 'h2')">Subtitle</button>
+                        <button class="canvas-toolbar-btn" data-format="heading" onclick="applyCanvasFormat('situation', 'h3')">Heading</button>
+                        <button class="canvas-toolbar-btn" data-format="normal" onclick="applyCanvasFormat('situation', 'p')">Normal</button>
+                        <button class="canvas-toolbar-btn" data-format="bold" onclick="applyCanvasFormat('situation', 'bold')">B</button>
+                        <button class="canvas-toolbar-btn" data-format="italic" onclick="applyCanvasFormat('situation', 'italic')">/</button>
+                        <button class="canvas-toolbar-btn" data-format="quote" onclick="applyCanvasFormat('situation', 'blockquote')">Quote</button>
+                    </div>
+                    <div class="canvas-section-content" 
+                         contenteditable="true"
+                         id="situationContent"
+                         data-placeholder="Click to describe the current state... What's the problem or challenge?"
+                         onfocus="showCanvasToolbar('situation')"
+                         onblur="saveProjectField('${projectId}', 'situation', this.innerHTML)">${project.situation || ''}</div>
+                </div>
+            `;
+
+            // Ideas - List with add button
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">💡 Ideas & Options</div>
+                    </div>
+                    <div class="canvas-list-section">
+                        ${project.ideas && project.ideas.length > 0 
+                            ? project.ideas.map((idea, index) => `
+                                <div class="canvas-item idea">
+                                    <div class="canvas-item-content" 
+                                         contenteditable="true"
+                                         onblur="updateProjectItem('${projectId}', 'ideas', ${index}, this.textContent)">${idea.content}</div>
+                                    <div class="canvas-item-meta">
+                                        <span>${formatDateInEnglish(idea.timestamp.split('T')[0]).short}</span>
+                                        <div class="canvas-item-actions">
+                                            <button class="canvas-item-btn delete-item-btn" onclick="deleteProjectItem('${projectId}', 'ideas', ${index})">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')
+                            : ''
+                        }
+                        <div class="add-item-btn" onclick="addNewProjectItem('${projectId}', 'ideas')">
+                            + Add idea or option
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Actions - List with add button and done toggle
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">✅ Actions & Next Steps</div>
+                    </div>
+                    <div class="canvas-list-section">
+                        ${project.actions && project.actions.length > 0 
+                            ? project.actions.map((action, index) => `
+                                <div class="canvas-item action ${action.done ? 'done' : ''}">
+                                    <div class="canvas-item-content" 
+                                         contenteditable="true"
+                                         onblur="updateProjectItem('${projectId}', 'actions', ${index}, this.textContent)">${action.content}</div>
+                                    <div class="canvas-item-meta">
+                                        <span>${formatDateInEnglish(action.timestamp.split('T')[0]).short}</span>
+                                        <div class="canvas-item-actions">
+                                            <button class="canvas-item-btn toggle-action-btn" onclick="toggleAction('${projectId}', ${index})">${action.done ? '↩ Undo' : '✓ Done'}</button>
+                                            <button class="canvas-item-btn delete-item-btn" onclick="deleteProjectItem('${projectId}', 'actions', ${index})">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')
+                            : ''
+                        }
+                        <div class="add-item-btn" onclick="addNewProjectItem('${projectId}', 'actions')">
+                            + Add action or next step
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Progress Log - Newest first
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">📊 Progress & Updates</div>
+                    </div>
+                    <div class="canvas-list-section">
+                        ${project.progress && project.progress.length > 0 
+                            ? project.progress.slice().reverse().map((update, index) => {
+                                const realIndex = project.progress.length - 1 - index;
+                                return `
+                                <div class="canvas-item progress">
+                                    <div class="canvas-item-content" 
+                                         contenteditable="true"
+                                         onblur="updateProjectItem('${projectId}', 'progress', ${realIndex}, this.textContent)">${update.content}</div>
+                                    <div class="canvas-item-meta">
+                                        <span>${formatDateInEnglish(update.timestamp.split('T')[0]).short}</span>
+                                        <div class="canvas-item-actions">
+                                            <button class="canvas-item-btn delete-item-btn" onclick="deleteProjectItem('${projectId}', 'progress', ${realIndex})">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `}).join('')
+                            : ''
+                        }
+                        <div class="add-item-btn" onclick="addNewProjectItem('${projectId}', 'progress')">
+                            + Log progress or update
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Free-form Notes Section - For open writing
+            html += `
+                <div class="canvas-section">
+                    <div class="canvas-section-header">
+                        <div class="canvas-section-title">📝 Notes & Thoughts</div>
+                    </div>
+                    <div class="canvas-toolbar" id="notesToolbar">
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('h1')">Title</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('h2')">Subtitle</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('h3')">Heading</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('p')">Normal</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('bold')">B</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('italic')">/</button>
+                        <button class="canvas-toolbar-btn" onclick="applyNotesFormat('blockquote')">Quote</button>
+                    </div>
+                    <div class="canvas-section-content project-freeform-notes" 
+                         contenteditable="true" 
+                         id="notesContent"
+                         spellcheck="true"
+                         data-placeholder="Write freely here... reflections, random thoughts, brainstorming, anything..."
+                         onfocus="showCanvasToolbar('notes')"
+                         onblur="saveProjectField('${projectId}', 'notes', this.innerHTML)"
+                         oninput="updateProjectWordCount('${projectId}')"
+                         style="min-height: 200px;">${project.notes || ''}</div>
+                    <div class="project-notes-word-count" id="projectWordCount-${projectId}" style="text-align: right; color: #999; font-size: 0.85em; margin-top: 8px;">0 words</div>
+                </div>
+            `;
+
+            canvas.innerHTML = html;
+            
+            // Update word count
+            updateProjectWordCount(projectId);
+        }
+
+        function applyNotesFormat(format) {
+            const content = document.getElementById('notesContent');
+            if (!content) return;
+            
+            content.focus();
+            
+            if (format === 'bold') {
+                document.execCommand('bold', false, null);
+            } else if (format === 'italic') {
+                document.execCommand('italic', false, null);
+            } else if (format === 'h1' || format === 'h2' || format === 'h3' || format === 'p') {
+                document.execCommand('formatBlock', false, format);
+            } else if (format === 'blockquote') {
+                document.execCommand('formatBlock', false, 'blockquote');
+            }
+        }
+
+        function saveProjectField(projectId, field, content) {
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            if (field === 'notes') {
+                // Save HTML for rich text
+                project[field] = content;
+            } else {
+                project[field] = content.trim();
+            }
+            
+            project.updatedAt = new Date().toISOString();
+            saveProjects(projects);
+        }
+
+        function updateProjectWordCount(projectId) {
+            const notesElement = document.querySelector('.project-freeform-notes');
+            const countElement = document.getElementById(`projectWordCount-${projectId}`);
+            
+            if (notesElement && countElement) {
+                const text = notesElement.textContent || notesElement.innerText || '';
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                const wordCount = text.trim().length === 0 ? 0 : words.length;
+                countElement.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function showCanvasToolbar(section) {
+            const toolbar = document.getElementById(section + 'Toolbar');
+            if (toolbar) {
+                toolbar.classList.add('active');
+            }
+        }
+
+        function applyCanvasFormat(section, format) {
+            const content = document.getElementById(section + 'Content');
+            if (!content) return;
+            
+            content.focus();
+            
+            if (format === 'bold') {
+                document.execCommand('bold', false, null);
+            } else if (format === 'italic') {
+                document.execCommand('italic', false, null);
+            } else if (format === 'h1' || format === 'h2' || format === 'h3' || format === 'p') {
+                document.execCommand('formatBlock', false, format);
+            } else if (format === 'blockquote') {
+                document.execCommand('formatBlock', false, 'blockquote');
+            }
+        }
+
+        function addNewProjectItem(projectId, type) {
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            if (!project[type]) project[type] = [];
+            
+            const newItem = {
+                content: '',
+                timestamp: new Date().toISOString()
+            };
+            
+            if (type === 'actions') {
+                newItem.done = false;
+            }
+            
+            project[type].push(newItem);
+            project.updatedAt = new Date().toISOString();
+            
+            saveProjects(projects);
+            loadProjectCanvas(projectId);
+            
+            // Focus the new item
+            setTimeout(() => {
+                const items = document.querySelectorAll('.canvas-item-content');
+                if (items.length > 0) {
+                    const lastItem = type === 'progress' ? items[0] : items[items.length - 1];
+                    lastItem.focus();
+                }
+            }, 100);
+        }
+
+        function updateProjectItem(projectId, type, index, content) {
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            if (project[type] && project[type][index]) {
+                project[type][index].content = content.trim();
+                project.updatedAt = new Date().toISOString();
+                saveProjects(projects);
+            }
+        }
+
+        function deleteProjectItem(projectId, type, index) {
+            if (!confirm('Delete this item?')) return;
+            
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            project[type].splice(index, 1);
+            project.updatedAt = new Date().toISOString();
+            
+            saveProjects(projects);
+            loadProjectCanvas(projectId);
+        }
+
+        function toggleAction(projectId, actionIndex) {
+            const projects = getProjects();
+            const project = projects[projectId];
+            
+            project.actions[actionIndex].done = !project.actions[actionIndex].done;
+            project.updatedAt = new Date().toISOString();
+            
+            saveProjects(projects);
+            loadProjectCanvas(projectId);
+        }
+
+        function toggleProjectStatus() {
+            if (!currentProjectId) return;
+
+            const projects = getProjects();
+            const project = projects[currentProjectId];
+
+            project.status = project.status === 'active' ? 'solved' : 'active';
+            project.updatedAt = new Date().toISOString();
+
+            saveProjects(projects);
+            
+            // Update button text
+            const solvedBtn = document.getElementById('markSolvedBtn');
+            solvedBtn.textContent = project.status === 'solved' ? '↩ Reopen' : '✓ Solved';
+            
+            loadProjectCanvas(currentProjectId);
+        }
+
+        function deleteProject() {
+            if (!currentProjectId) return;
+
+            const projects = getProjects();
+            const project = projects[currentProjectId];
+
+            if (!confirm(`Delete "${project.title}"? This cannot be undone.`)) return;
+
+            delete projects[currentProjectId];
+            saveProjects(projects);
+            
+            closeProjectDetailModal();
+            closeProjectsModal();
         }
     </script>
 </body>
