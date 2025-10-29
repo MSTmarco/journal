@@ -27,6 +27,33 @@ const App = {
     // ========== NAVIGATION ==========
 
     setupNavigation() {
+        // ========== HIDE NAVBAR ON SCROLL ==========
+
+setupScrollBehavior() {
+    let lastScrollTop = 0;
+    const nav = document.querySelector('.main-nav');
+    const scrollThreshold = 100; // Start hiding after 100px scroll
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > scrollThreshold) {
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down - hide navbar
+                nav.classList.add('hidden');
+            } else {
+                // Scrolling up - show navbar
+                nav.classList.remove('hidden');
+            }
+        } else {
+            // At top of page - always show navbar
+            nav.classList.remove('hidden');
+        }
+        
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+},
+        
         const navTabs = document.querySelectorAll('.nav-tab');
         
         navTabs.forEach(tab => {
