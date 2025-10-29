@@ -6,23 +6,21 @@ const App = {
 
     // ========== INITIALIZATION ==========
 
-    init() {
-        console.log('🚀 Initializing Journal & Projects App...');
-        
-        // Migrate old data if needed
-        Storage.migrateOldData();
-        
-        // Initialize modules
-        this.setupNavigation();
-        Journal.init();
-        Projects.init();
-        Calendar.render(document.getElementById('calendarGrid'));
-        
-        // Show default view (Projects first!)
-        this.switchView(this.currentView);
-        
-        console.log('✅ App initialized successfully!');
-    },
+init() {
+    console.log('🚀 Initializing Journal & Projects App...');
+    
+    Storage.migrateOldData();
+    
+    this.setupNavigation();
+    this.setupScrollBehavior(); // Add this line!
+    Journal.init();
+    Projects.init();
+    Calendar.render(document.getElementById('calendarGrid'));
+    
+    this.switchView(this.currentView);
+    
+    console.log('✅ App initialized successfully!');
+},
 
     // ========== NAVIGATION ==========
 
