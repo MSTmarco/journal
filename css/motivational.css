@@ -1,0 +1,259 @@
+/* ========== MOTIVATIONAL IMAGES STYLES ========== */
+
+.motivational-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 48px;
+    margin: 30px 0;
+    color: #2d3748;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+    transition: all 0.5s ease;
+}
+
+.motivational-section.fade-in {
+    animation: fadeInScale 0.6s ease;
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.motivational-header {
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 20px;
+}
+
+.motivational-header h3 {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #495057;
+    font-family: Georgia, serif;
+}
+
+.motivational-header p {
+    font-size: 15px;
+    color: #6c757d;
+    margin: 0;
+    font-style: italic;
+    font-family: Georgia, serif;
+}
+
+.motivational-content {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.figure-image-container {
+    position: relative;
+}
+
+.figure-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 3px solid #dee2e6;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+    filter: grayscale(15%);
+}
+
+.figure-image:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    filter: grayscale(0%);
+}
+
+.figure-details {
+    flex: 1;
+    padding-top: 8px;
+}
+
+.figure-name {
+    font-size: 32px;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+    color: #212529;
+    font-family: Georgia, serif;
+}
+
+.figure-title {
+    font-size: 16px;
+    color: #6c757d;
+    margin: 0 0 24px 0;
+    font-weight: 400;
+    font-style: italic;
+    font-family: Georgia, serif;
+}
+
+.figure-quote {
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.8;
+    margin: 0 0 28px 0;
+    padding: 24px 32px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid #adb5bd;
+    color: #495057;
+    font-family: Georgia, serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.figure-quote:before {
+    content: '"';
+    font-size: 48px;
+    color: #dee2e6;
+    position: absolute;
+    margin-left: -24px;
+    margin-top: -16px;
+    font-family: Georgia, serif;
+}
+
+.figure-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.figure-btn {
+    padding: 10px 20px;
+    background: white;
+    color: #495057;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.figure-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.figure-btn:active {
+    transform: translateY(0);
+}
+
+.figure-btn.primary {
+    background: #343a40;
+    color: white;
+    border-color: #343a40;
+}
+
+.figure-btn.primary:hover {
+    background: #495057;
+    border-color: #495057;
+}
+
+/* Icon buttons */
+.figure-btn.icon-only {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .motivational-section {
+        padding: 30px 24px;
+    }
+
+    .motivational-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .figure-image-container {
+        margin: 0 auto;
+    }
+
+    .figure-image {
+        width: 160px;
+        height: 160px;
+    }
+
+    .figure-name {
+        font-size: 28px;
+    }
+
+    .figure-title {
+        font-size: 15px;
+    }
+
+    .figure-quote {
+        font-size: 17px;
+        padding: 20px 24px;
+        text-align: left;
+    }
+
+    .figure-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .figure-btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .motivational-header h3 {
+        font-size: 20px;
+    }
+
+    .figure-name {
+        font-size: 24px;
+    }
+
+    .figure-quote {
+        font-size: 16px;
+    }
+
+    .figure-image {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.loading .figure-image {
+    animation: pulse 2s infinite;
+}
+
