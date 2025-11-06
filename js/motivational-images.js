@@ -112,22 +112,29 @@ const MotivationalImages = {
         this.currentIndex = index;
 
         if (this.imageElement) {
-            // Try PNG first, then JPG
-            let imagePath = figure.image;
-            this.imageElement.src = imagePath;
-            this.imageElement.alt = figure.name;
+            // Try multiple file extensions
+            const basePath = figure.image.replace('.png', '');
+            const extensions = ['.png', '.PNG', '.jpg', '.JPG', '.jpeg', '.JPEG'];
+            let extensionIndex = 0;
             
-            // Add error handler for missing images
-            this.imageElement.onerror = () => {
-                // Try .jpg if .png fails
-                if (imagePath.endsWith('.png')) {
-                    imagePath = imagePath.replace('.png', '.jpg');
-                    this.imageElement.src = imagePath;
-                    this.imageElement.onerror = () => this.createInitialsFallback(index, figure);
-                } else {
+            const tryNextExtension = () => {
+                if (extensionIndex >= extensions.length) {
+                    // All extensions failed, show initials fallback
                     this.createInitialsFallback(index, figure);
+                    return;
                 }
+                
+                const imagePath = basePath + extensions[extensionIndex];
+                this.imageElement.src = imagePath;
+                
+                this.imageElement.onerror = () => {
+                    extensionIndex++;
+                    tryNextExtension();
+                };
             };
+            
+            this.imageElement.alt = figure.name;
+            tryNextExtension();
         }
 
         if (this.nameElement) {
